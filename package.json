@@ -4,7 +4,9 @@
   "description": "Widget for displaying a Tagplay feed",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "standalone": "browserify index.js --standalone TagplayWidget > tagplay-widget.js",
+    "standalone-min": "browserify index.js --standalone TagplayWidget | uglifyjs > tagplay-widget.min.js"
   },
   "repository": {
     "type": "git",
@@ -27,5 +29,9 @@
     "data-set": "^4.0.0",
     "is-dom": "^1.0.5",
     "tagplay": "^1.0.0"
+  },
+  "devDependencies": {
+    "browserify": "^9.0.8",
+    "uglifyjs": "^2.4.10"
   }
 }
