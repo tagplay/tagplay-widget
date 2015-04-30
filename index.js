@@ -4,6 +4,7 @@ var Tagplay = require('tagplay');
 var dataset = require('data-set');
 var isDom = require('is-dom');
 var postWidget = require('@tagplay/tagplay-standalone-post');
+var generateCSS = require('tagplay-widget-styles').generateCSS;
 
 module.exports = Widget;
 
@@ -16,6 +17,8 @@ function Widget(container, config) {
   this.client = new Tagplay(config);
   this.config = extend(config);
   this.container = container;
+  this.name = container.name || generateName();
+  addStyles(this);
   fetch(this);
 }
 
@@ -35,6 +38,33 @@ function extend(config) {
   config.cols = Number(config.cols || 1);
   config.num_media = config.rows * config.cols;
   return config;
+}
+
+function generateName() {
+  var chars = []
+  for (var i = 0; i < 6; i++) {
+    chars[i] = 97 + Math.floor(Math.random() * 26);
+  }
+  return String.fromCharCode.apply(null, chars);
+}
+
+function addStyles(self) {
+  self.container.className += " tagplay-widget-" + self.name;
+
+  var css = generateCSS(self.name, self.config);
+
+  var head = document.head || document.getElementsByTagName("head")[0];
+  var style = document.createElement("style");
+
+  style.type = 'text/css';
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  }
+  else {
+    style.appendChild(document.createTextNode(css));
+  }
+
+  head.appendChild(style);
 }
 
 function fetch(self) {
