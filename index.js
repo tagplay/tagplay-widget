@@ -4,7 +4,7 @@ var Tagplay = require('tagplay');
 var dataset = require('data-set');
 var isDom = require('is-dom');
 var postWidget = require('@tagplay/tagplay-standalone-post');
-var generateCSS = require('tagplay-widget-styles').generateCSS;
+var generateCSS = require('@tagplay/tagplay-widget-styles').generateCSS;
 
 module.exports = Widget;
 
