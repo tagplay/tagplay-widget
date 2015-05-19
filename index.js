@@ -82,8 +82,6 @@ function fetch(self) {
 
 function show(self, post) {
   var config = self.config;
-  var media_size = 100 / config.cols;
   var elem = postWidget(post, config);
-  elem.setAttribute('style', 'width: ' + media_size + '%');
   self.container.appendChild(elem);
 }
