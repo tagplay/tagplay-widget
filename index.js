@@ -27,6 +27,7 @@ function extractConfigFromDom(elem) {
   // Forcing true into some values since some of the data-set parameters only need to exist in html to be truthfully
   Object.keys(ds).forEach(function(key) {
     if (!ds[key]) ds[key] = true;
+    if (key.indexOf('-') !== -1) ds[key.replace(/-/g, '_')] = ds[key];
   });
 
   if (!Object.keys(ds).length) return null;
