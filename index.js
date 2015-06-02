@@ -83,6 +83,7 @@ function fetch(self) {
 
 function show(self, post) {
   var config = self.config;
+  config.client = self.client;
   var elem = postWidget(post, config);
   self.container.appendChild(elem);
 }
