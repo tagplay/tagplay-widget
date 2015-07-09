@@ -50,9 +50,19 @@ function generateName() {
 }
 
 function addStyles(self) {
-  self.container.className += " tagplay-widget-" + self.name;
+  // Check if we have at least one element with an ID surrounding the container
+  var selectorPrefix = "#" + self.container.id + ".tagplay-widget ";
 
-  var css = generateCSS(self.name, self.config);
+  var curContainer = self.container;
+  while (curContainer.parentNode) {
+    curContainer = curContainer.parentNode;
+    if (curContainer.id) {
+      selectorPrefix = "#" + curContainer.id + " " + selectorPrefix;
+      break;
+    }
+  }
+
+  var css = generateCSS("#" + wrapperId + " #" + self.container.id + " ", self.config);
 
   var head = document.head || document.getElementsByTagName("head")[0];
   var style = document.createElement("style");
