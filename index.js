@@ -17,7 +17,7 @@ function Widget(container, config) {
   this.client = new Tagplay(config);
   this.config = extend(config);
   this.container = container;
-  this.name = container.name || generateName();
+  this.name = container.name || config.feed.substring(0, 6);
   addStyles(this);
   fetch(this);
 }
@@ -41,16 +41,11 @@ function extend(config) {
   return config;
 }
 
-function generateName() {
-  var chars = []
-  for (var i = 0; i < 6; i++) {
-    chars[i] = 97 + Math.floor(Math.random() * 26);
-  }
-  return String.fromCharCode.apply(null, chars);
-}
-
 function addStyles(self) {
   // Check if we have at least one element with an ID surrounding the container
+  if (!self.container.id) {
+    self.container.id = "tagplay-widget-" + this.name;
+  }
   var selectorPrefix = "#" + self.container.id + ".tagplay-widget ";
 
   var curContainer = self.container;
@@ -62,7 +57,7 @@ function addStyles(self) {
     }
   }
 
-  var css = generateCSS("#" + wrapperId + " #" + self.container.id + " ", self.config);
+  var css = generateCSS(selectorPrefix, self.config, !!self.config.responsive);
 
   var head = document.head || document.getElementsByTagName("head")[0];
   var style = document.createElement("style");
