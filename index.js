@@ -18,6 +18,7 @@ function Widget(container, config) {
   this.config = extend(config);
   this.container = container;
   this.name = container.name || config.feed.substring(0, 6);
+
   addStyles(this);
   fetch(this);
 }
@@ -44,7 +45,7 @@ function extend(config) {
 function addStyles(self) {
   // Check if we have at least one element with an ID surrounding the container
   if (!self.container.id) {
-    self.container.id = "tagplay-widget-" + this.name;
+    self.container.id = "tagplay-widget-" + self.name;
   }
   var selectorPrefix = "#" + self.container.id + ".tagplay-widget ";
 
@@ -54,6 +55,15 @@ function addStyles(self) {
     if (curContainer.id) {
       selectorPrefix = "#" + curContainer.id + " " + selectorPrefix;
       break;
+    }
+  }
+
+  if (self.config.type === 'waterfall') {
+    self.columns = [];
+    for (var i = 0; i < self.config.cols; i++) {
+      var col = column();
+      self.columns.push(col);
+      self.container.appendChild(col);
     }
   }
 
@@ -73,6 +83,27 @@ function addStyles(self) {
   head.appendChild(style);
 }
 
+function column() {
+  var col = document.createElement('div');
+  col.setAttribute('class', "tagplay-waterfall-column");
+  return col;
+}
+
+function getPostParent(self) {
+  if (self.columns) {
+    var shortestCol = 0;
+    for (var i = 1; i < self.columns.length; i++) {
+      if (self.columns[i].offsetHeight < self.columns[shortestCol].offsetHeight) {
+        shortestCol = i;
+      }
+    }
+    return self.columns[shortestCol];
+  }
+  else {
+    return self.container;
+  }
+}
+
 function fetch(self) {
   var config = self.config;
 
@@ -90,5 +121,6 @@ function show(self, post) {
   var config = self.config;
   config.client = self.client;
   var elem = postWidget(post, config);
-  self.container.appendChild(elem);
+  var parent = getPostParent(self);
+  parent.appendChild(elem);
 }
