@@ -8,6 +8,13 @@ var generateCSS = require('@tagplay/tagplay-widget-styles').generateCSS;
 
 module.exports = Widget;
 
+if (window && window.tagplayWidgetQueue) {
+  window.tagplayWidgetQueue.forEach(function(widgetElement) {
+    var widget = new Widget(widgetElement);
+  });
+  window.tagplayWidgetQueue = null;
+}
+
 function Widget(container, config) {
   if (!(this instanceof Widget)) return new Widget(config);
   if (!container || !isDom(container)) return console.error('[tagplay-widget] Missing placeholder div element');
