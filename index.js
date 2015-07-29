@@ -16,7 +16,7 @@ if (window && window.tagplayWidgetQueue) {
 }
 
 function Widget(container, config) {
-  if (!(this instanceof Widget)) return new Widget(config);
+  if (!(this instanceof Widget)) return new Widget(container, config);
   if (!container || !isDom(container)) return console.error('[tagplay-widget] Missing placeholder div element');
   if (!config) config = extractConfigFromDom(container);
   if (!config) return console.error('[tagplay-widget] Missing configuration');
