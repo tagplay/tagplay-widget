@@ -46,6 +46,12 @@ function extend(config) {
   config.rows = Number(config.rows || 1);
   config.cols = Number(config.cols || 1);
   config.num_media = config.rows * config.cols;
+  if (!('hashtags' in config) && 'text' in config) {
+    config.hashtags = (config.text === 'stripped' ? 'remove_triggers' : config.text === 'tagless' ? 'remove' : 'show');
+  }
+  if (!('strip_hash' in config)) {
+    config.strip_hash = config.text === 'normalized' || config.text === 'stripped' || config.text === 'tagless';
+  }
   return config;
 }
 
@@ -116,12 +122,25 @@ function fetch(self) {
 
   self.client.listPost(config.project, config.feed, {limit: config.num_media}, function(error, body) {
     if (error) return console.error('[tagplay-widget] error:', error);
+    if (body && body.meta) {
+      if (body.meta.branded) {
+        addBranding(self);
+      }
+      self.config.trigger_tags = body.meta.trigger_tags;
+    }
+
     if (body && body.data) body.data.forEach(each);
 
     function each(post) {
       show(self, post);
     }
   });
+}
+
+function addBranding(self) {
+  // var elem = document.createElement('span');
+  // elem.setAttribute('class', 'tagplay-branding');
+  // self.container.appendChild(elem);
 }
 
 function show(self, post) {
