@@ -7,7 +7,7 @@ var UglifyJS = require('uglify-js');
 globalWrap({
   main: 'index.js',
   global: 'TagplayWidget',
-  browserifyOptions: { detectGlobals: false }
+  browserifyOptions: { detectGlobals: true }
 }, function (err, output) {
   if (err) throw err;
 
