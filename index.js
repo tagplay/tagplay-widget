@@ -26,6 +26,8 @@ function Widget(container, config) {
   this.container = container;
   this.name = container.name || config.feed.substring(0, 6);
 
+  this.posts = [];
+
   addStyles(this);
   fetch(this);
 }
@@ -60,7 +62,8 @@ function addStyles(self) {
   if (!self.container.id) {
     self.container.id = "tagplay-widget-" + self.name;
   }
-  var selectorPrefix = "#" + self.container.id + ".tagplay-widget ";
+
+  var selectorPrefix = "#" + self.container.id + ".tagplay-widget, #" + self.container.id + "-lightbox.tagplay-lightbox";
 
   var curContainer = self.container;
   while (curContainer.parentNode) {
@@ -132,6 +135,7 @@ function fetch(self) {
     if (body && body.data) body.data.forEach(each);
 
     function each(post) {
+      self.posts.push(post);
       show(self, post);
     }
   });
@@ -146,7 +150,108 @@ function addBranding(self) {
 function show(self, post) {
   var config = self.config;
   config.client = self.client;
-  var elem = postWidget(post, config);
+  var onclick = undefined;
+  if (config.lightbox) {
+    onclick = function() {
+      openLightbox(self, post);
+    };
+  }
+  var elem = postWidget(post, config, onclick);
   var parent = getPostParent(self);
   parent.appendChild(elem);
+}
+
+function findPostIndex(self, post) {
+  for (var i = 0; i < self.posts.length; i++) {
+    if (self.posts[i].id === post.id) {
+      return i;
+    }
+  }
+  return null;
+}
+
+function getNavigatedPost(self, post, direction) {
+  var index = findPostIndex(self, post);
+  if (index === null) return null;
+
+  return self.posts[index + direction] || null;
+}
+
+function navigate(self, post, direction) {
+  var post = getNavigatedPost(self, post, direction);
+  if (post) {
+    openLightbox(self, post);
+  }
+  else {
+    closeLightbox();
+  }
+}
+
+function arrow(self, post, direction, className) {
+  var a = document.createElement('a');
+  a.setAttribute('href', '#');
+  a.setAttribute('class', className);
+  a.onclick = function(e) {
+    if (!e) var e = window.event;
+    e.cancelBubble = true;
+    if (e.stopPropagation) e.stopPropagation();
+
+    navigate(self, post, direction);
+    return false;
+  };
+  return a;
+}
+
+function openLightbox(self, post) {
+  closeLightbox();
+
+  var backdrop = document.createElement('div');
+  backdrop.setAttribute('class', 'tagplay-lightbox-backdrop');
+  backdrop.setAttribute('tabindex', 0);
+  backdrop.onclick = closeLightbox;
+  backdrop.onkeydown = function(e) {
+    if (!e) var e = window.event;
+    if (e.keyCode === 37) {
+      navigate(self, post, -1);
+    }
+    else if (e.keyCode === 39) {
+      navigate(self, post, 1);
+    }
+  };
+
+  var lightbox = document.createElement('div');
+  lightbox.setAttribute('class', 'tagplay-lightbox');
+  lightbox.setAttribute('id', self.container.id + '-lightbox');
+
+  document.body.originalOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+
+  var widget = postWidget(post, self.config);
+  widget.onclick = function(e) {
+    if (!e) var e = window.event;
+    e.cancelBubble = true;
+    if (e.stopPropagation) e.stopPropagation();
+  };
+  lightbox.appendChild(widget);
+
+  if (getNavigatedPost(self, post, -1)) {
+    lightbox.appendChild(arrow(self, post, -1, 'tagplay-lightbox-prev'));
+  }
+  if (getNavigatedPost(self, post, 1)) {
+    lightbox.appendChild(arrow(self, post, 1, 'tagplay-lightbox-next'));
+  }
+
+  backdrop.appendChild(lightbox);
+  document.body.appendChild(backdrop);
+  backdrop.focus();
+}
+
+function closeLightbox() {
+  var existingBackdrop = document.getElementsByClassName('tagplay-lightbox-backdrop');
+  if (existingBackdrop.length > 0) {
+    for (var i = 0; i < existingBackdrop.length; i++) {
+      document.body.removeChild(existingBackdrop[i]);
+    }
+    document.body.style.overflow = document.body.originalOverflow || 'auto';
+  }
 }
