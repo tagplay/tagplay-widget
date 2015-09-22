@@ -217,6 +217,9 @@ function openLightbox(self, post) {
     else if (e.keyCode === 39) {
       navigate(self, post, 1);
     }
+    else if (e.keyCode === 27) {
+      closeLightbox();
+    }
   };
 
   var lightbox = document.createElement('div');
