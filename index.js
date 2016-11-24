@@ -55,6 +55,10 @@ function extend (config) {
   if (!('strip_hash' in config)) {
     config.strip_hash = config.text === 'normalized' || config.text === 'stripped' || config.text === 'tagless';
   }
+  if (!('inline_video' in config)) {
+    // By default, don't show video if we have the lightbox on - we can view it in the lightbox
+    config.inline_video = !config.lightbox;
+  }
   return config;
 }
 
@@ -152,7 +156,7 @@ function show (self, post) {
   var onclick;
   if (config.lightbox) {
     onclick = function () {
-      lightbox.open(postWidget(post, config), getCanNavigateFunc(self, post), getNavigateFunc(self, post), self.container.id + '-lightbox');
+      lightbox.open(postWidget(post, getModifiedConfig(config, { inline_video: true, play_video: true, play_sound: true })), getCanNavigateFunc(self, post), getNavigateFunc(self, post), self.container.id + '-lightbox');
     };
   }
   var elem = postWidget(post, config, onclick);
@@ -170,7 +174,7 @@ function getNavigateFunc (self, post) {
   return function (dir) {
     var nextPost = getNavigatedPost(self, post, dir);
     if (nextPost) {
-      lightbox.open(postWidget(nextPost, self.config), getCanNavigateFunc(self, nextPost), getNavigateFunc(self, nextPost), self.container.id + '-lightbox');
+      lightbox.open(postWidget(nextPost, getModifiedConfig(self.config, { inline_video: true, play_sound: true })), getCanNavigateFunc(self, nextPost), getNavigateFunc(self, nextPost), self.container.id + '-lightbox');
     } else {
       lightbox.close();
     }
@@ -191,4 +195,20 @@ function getNavigatedPost (self, post, direction) {
   if (index === null) return null;
 
   return self.posts[index + direction] || null;
+}
+
+function getModifiedConfig (config, edits) {
+  var newConfig = {};
+  var property;
+  for (property in config) {
+    if (config.hasOwnProperty(property)) {
+      newConfig[property] = config[property];
+    }
+  }
+  for (property in edits) {
+    if (edits.hasOwnProperty(property)) {
+      newConfig[property] = edits[property];
+    }
+  }
+  return newConfig;
 }
