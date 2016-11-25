@@ -59,6 +59,10 @@ function extend (config) {
     // By default, don't show video if we have the lightbox on - we can view it in the lightbox
     config.inline_video = !config.lightbox;
   }
+  if (!('embed-link-metadata' in config)) {
+    // By default, don't embed linked metadata if we have the lightbox on, as above
+    config.embed_link_metadata = !config.lightbox;
+  }
   return config;
 }
 
@@ -156,7 +160,7 @@ function show (self, post) {
   var onclick;
   if (config.lightbox) {
     onclick = function () {
-      lightbox.open(postWidget(post, getModifiedConfig(config, { inline_video: true, play_video: true, play_sound: true })), getCanNavigateFunc(self, post), getNavigateFunc(self, post), self.container.id + '-lightbox');
+      lightbox.open(postWidget(post, lightboxConfig(config)), getCanNavigateFunc(self, post), getNavigateFunc(self, post), self.container.id + '-lightbox');
     };
   }
   var elem = postWidget(post, config, onclick);
@@ -174,7 +178,7 @@ function getNavigateFunc (self, post) {
   return function (dir) {
     var nextPost = getNavigatedPost(self, post, dir);
     if (nextPost) {
-      lightbox.open(postWidget(nextPost, getModifiedConfig(self.config, { inline_video: true, play_sound: true })), getCanNavigateFunc(self, nextPost), getNavigateFunc(self, nextPost), self.container.id + '-lightbox');
+      lightbox.open(postWidget(nextPost, lightboxConfig(self.config)), getCanNavigateFunc(self, nextPost), getNavigateFunc(self, nextPost), self.container.id + '-lightbox');
     } else {
       lightbox.close();
     }
@@ -195,6 +199,10 @@ function getNavigatedPost (self, post, direction) {
   if (index === null) return null;
 
   return self.posts[index + direction] || null;
+}
+
+function lightboxConfig (config) {
+  return getModifiedConfig(config, { inline_video: true, embed_link_metadata: true, play_video: true, play_sound: true });
 }
 
 function getModifiedConfig (config, edits) {
