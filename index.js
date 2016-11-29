@@ -59,9 +59,9 @@ function extend (config) {
     // By default, don't show video if we have the lightbox on - we can view it in the lightbox
     config.inline_video = !config.lightbox;
   }
-  if (!('embed-link-metadata' in config)) {
-    // By default, don't embed linked metadata if we have the lightbox on, as above
-    config.embed_link_metadata = !config.lightbox;
+  if (!('inline_link_embed' in config)) {
+    // By default, don't embed linked metadata inline if we have the lightbox on, as above
+    config.inline_link_embed = !config.lightbox;
   }
   return config;
 }
@@ -202,7 +202,7 @@ function getNavigatedPost (self, post, direction) {
 }
 
 function lightboxConfig (config) {
-  return getModifiedConfig(config, { inline_video: true, embed_link_metadata: true, play_video: true, play_sound: true });
+  return getModifiedConfig(config, { inline_video: true, inline_link_embed: true, play_video: true, play_sound: true });
 }
 
 function getModifiedConfig (config, edits) {
