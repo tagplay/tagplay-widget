@@ -1,6 +1,6 @@
 {
   "name": "@tagplay/tagplay-widget",
-  "version": "1.10.4",
+  "version": "1.11.0",
   "description": "Widget for displaying a Tagplay feed",
   "main": "index.js",
   "scripts": {
