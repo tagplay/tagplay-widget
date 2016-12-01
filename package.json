@@ -29,7 +29,7 @@
     "data-set": "4.0.0",
     "is-dom": "1.0.5",
     "tagplay-lightbox": "1.0.0",
-    "tagplay-standalone-post": "1.9.0",
+    "tagplay-standalone-post": "1.9.1",
     "tagplay": "1.2.0"
   },
   "devDependencies": {
