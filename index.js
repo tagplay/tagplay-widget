@@ -160,7 +160,7 @@ function show (self, post) {
   var onclick;
   if (config.lightbox) {
     onclick = function () {
-      lightbox.open(postWidget(post, lightboxConfig(config)), getCanNavigateFunc(self, post), getNavigateFunc(self, post), self.container.id + '-lightbox');
+      lightbox.open(postWidget(post, lightboxConfig(config), null, 0), getCanNavigateFunc(self, post, 0), getNavigateFunc(self, post, 0), self.container.id + '-lightbox');
     };
   }
   var elem = postWidget(post, config, onclick);
@@ -168,17 +168,31 @@ function show (self, post) {
   parent.appendChild(elem);
 }
 
-function getCanNavigateFunc (self, post) {
+function getPostMedia (post, opt) {
+  if (opt.no_images) {
+    return post.videos;
+  } else {
+    return post.videos.concat(post.images);
+  }
+}
+
+function isPostEmpty (post, opt) {
+  return !post.text && !(post.image && !opt.no_images) && !(post.video && !opt.no_videos) && !(post.linked_metadata && opt['include-linked-metadata']);
+}
+
+function getCanNavigateFunc (self, post, mediaIndex) {
   return function (dir) {
-    return getNavigatedPost(self, post, dir);
+    return !!getNavigatedPost(self, post, dir, mediaIndex);
   };
 }
 
-function getNavigateFunc (self, post) {
+function getNavigateFunc (self, post, mediaIndex) {
   return function (dir) {
-    var nextPost = getNavigatedPost(self, post, dir);
-    if (nextPost) {
-      lightbox.open(postWidget(nextPost, lightboxConfig(self.config)), getCanNavigateFunc(self, nextPost), getNavigateFunc(self, nextPost), self.container.id + '-lightbox');
+    var navigated = getNavigatedPost(self, post, dir, mediaIndex);
+    if (navigated) {
+      var nextPost = navigated[0];
+      var nextMediaIndex = navigated[1];
+      lightbox.open(postWidget(nextPost, lightboxConfig(self.config), null, nextMediaIndex), getCanNavigateFunc(self, nextPost, nextMediaIndex), getNavigateFunc(self, nextPost, nextMediaIndex), self.container.id + '-lightbox');
     } else {
       lightbox.close();
     }
@@ -194,11 +208,37 @@ function findPostIndex (self, post) {
   return null;
 }
 
-function getNavigatedPost (self, post, direction) {
-  var index = findPostIndex(self, post);
-  if (index === null) return null;
+function getNavigatedPost (self, post, direction, mediaIndex) {
+  var nextPost;
+  if (mediaIndex !== undefined && post) {
+    var nextMediaIndex = mediaIndex + direction;
 
-  return self.posts[index + direction] || null;
+    if (nextMediaIndex >= 0 && nextMediaIndex < getPostMedia(post, self.config).length) {
+      nextPost = post;
+    } else {
+      var index = findPostIndex(self, post);
+      if (index === null) return null;
+
+      if (nextMediaIndex >= 0) {
+        nextPost = self.posts[index + 1];
+        nextMediaIndex = 0;
+      } else {
+        nextPost = self.posts[index - 1];
+        nextMediaIndex = nextPost && getPostMedia(nextPost, self.config).length - 1;
+      }
+    }
+  } else {
+    nextPost = self.posts[index + direction];
+    nextMediaIndex = undefined;
+  }
+
+  if (!nextPost) return null;
+
+  if (isPostEmpty(nextPost, self.config)) {
+    return getNavigatedPost(self, nextPost, direction, nextMediaIndex);
+  }
+
+  return [nextPost, nextMediaIndex];
 }
 
 function lightboxConfig (config) {
