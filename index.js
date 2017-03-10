@@ -177,7 +177,7 @@ function getPostMedia (post, opt) {
 }
 
 function isPostEmpty (post, opt) {
-  return !post.text && !(post.image && !opt.no_images) && !(post.video && !opt.no_videos) && !(post.linked_metadata && opt['include-linked-metadata']);
+  return !post.text && !(post.image && !opt.no_images) && !(post.video && !opt.no_videos) && !(post.linked_metadata && opt.include_linked_metadata);
 }
 
 function getCanNavigateFunc (self, post, mediaIndex) {
