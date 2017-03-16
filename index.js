@@ -16,8 +16,8 @@ if (window && window.tagplayWidgetQueue) {
   window.tagplayWidgetQueue = null;
 }
 
-function Widget (container, config) {
-  if (!(this instanceof Widget)) return new Widget(container, config);
+function Widget (container, config, posts) {
+  if (!(this instanceof Widget)) return new Widget(container, config, posts);
   if (!container || !isDom(container)) return console.error('[tagplay-widget] Missing placeholder div element');
   if (!config) config = extractConfigFromDom(container);
   if (!config) return console.error('[tagplay-widget] Missing configuration');
@@ -25,7 +25,7 @@ function Widget (container, config) {
   this.client = new Tagplay(config);
   this.config = extend(config);
   this.container = container;
-  this.name = container.name || config.feed.substring(0, 6);
+  this.name = container.getAttribute('name') || config.feed.substring(0, 6);
 
   this.posts = [];
 
@@ -36,7 +36,12 @@ function Widget (container, config) {
   }
 
   addStyles(this);
-  fetch(this);
+
+  if (posts) {
+    loadPosts(this, posts);
+  } else {
+    fetch(this);
+  }
 
   var self = this;
 
@@ -107,8 +112,16 @@ function addStyles (self) {
   var css = generateCSS(selectorPrefix, self.config, !!self.config.responsive);
 
   var head = document.head || document.getElementsByTagName('head')[0];
+  var styleId = 'tagplay-widget-style-' + self.name;
+
+  var existingStyle = document.getElementById(styleId);
+  if (existingStyle) {
+    head.removeChild(existingStyle);
+  }
+
   var style = document.createElement('style');
 
+  style.id = styleId;
   style.type = 'text/css';
   if (style.styleSheet) {
     style.styleSheet.cssText = css;
@@ -151,17 +164,21 @@ function fetch (self) {
       self.config.trigger_tags = body.meta.trigger_tags;
     }
 
-    if (body && body.data) body.data.forEach(each);
-
-    if (window.history.state && window.history.state.tagplayLightbox && window.history.state.tagplayLightbox.id === self.container.id) {
-      openLightbox(self, window.history.state.tagplayLightbox.post, window.history.state.tagplayLightbox.mediaIndex, true);
-    }
-
-    function each (post) {
-      self.posts.push(post);
-      show(self, post);
-    }
+    if (body && body.data) loadPosts(self, body.data);
   });
+}
+
+function loadPosts (self, posts) {
+  posts.forEach(each);
+
+  if (window.history.state && window.history.state.tagplayLightbox && window.history.state.tagplayLightbox.id === self.container.id) {
+    openLightbox(self, window.history.state.tagplayLightbox.post, window.history.state.tagplayLightbox.mediaIndex, true);
+  }
+
+  function each (post) {
+    self.posts.push(post);
+    show(self, post);
+  }
 }
 
 function addBranding (self) {
