@@ -29,8 +29,24 @@ function Widget (container, config) {
 
   this.posts = [];
 
+  this.hasOpenLightbox = false;
+
+  if (!this.container.id) {
+    this.container.id = 'tagplay-widget-' + this.name;
+  }
+
   addStyles(this);
   fetch(this);
+
+  var self = this;
+
+  window.addEventListener('popstate', function (event) {
+    if (event.state && event.state.tagplayLightbox && event.state.tagplayLightbox.id === self.container.id) {
+      openLightbox(self, event.state.tagplayLightbox.post, event.state.tagplayLightbox.mediaIndex, true);
+    } else if ((!event.state || !event.state.tagplayLightbox) && self.hasOpenLightbox) {
+      closeLightbox(self, true);
+    }
+  });
 }
 
 function extractConfigFromDom (elem) {
@@ -68,10 +84,6 @@ function extend (config) {
 
 function addStyles (self) {
   // Check if we have at least one element with an ID surrounding the container
-  if (!self.container.id) {
-    self.container.id = 'tagplay-widget-' + self.name;
-  }
-
   var selectorPrefix = '#' + self.container.id + '.tagplay-widget, #' + self.container.id + '-lightbox.tagplay-lightbox';
 
   var curContainer = self.container;
@@ -141,6 +153,10 @@ function fetch (self) {
 
     if (body && body.data) body.data.forEach(each);
 
+    if (window.history.state && window.history.state.tagplayLightbox && window.history.state.tagplayLightbox.id === self.container.id) {
+      openLightbox(self, window.history.state.tagplayLightbox.post, window.history.state.tagplayLightbox.mediaIndex, true);
+    }
+
     function each (post) {
       self.posts.push(post);
       show(self, post);
@@ -160,12 +176,46 @@ function show (self, post) {
   var onclick;
   if (config.lightbox) {
     onclick = function () {
-      lightbox.open(postWidget(post, lightboxConfig(config), null, 0), getCanNavigateFunc(self, post, 0), getNavigateFunc(self, post, 0), self.container.id + '-lightbox');
+      openLightbox(self, post, 0);
     };
   }
   var elem = postWidget(post, config, onclick);
   var parent = getPostParent(self);
   parent.appendChild(elem);
+}
+
+function onLightboxClose (self) {
+  self.hasOpenLightbox = false;
+  if (window.history.pushState) window.history.pushState({}, '');
+}
+
+function openLightbox (self, post, mediaIndex, fromHistory) {
+  if (!fromHistory && window.history.pushState) {
+    var state = { tagplayLightbox: { id: self.container.id, post: post, mediaIndex: mediaIndex } };
+    if (self.hasOpenLightbox) {
+      window.history.replaceState(state, '');
+    } else {
+      window.history.pushState(state, '');
+    }
+  }
+  lightbox.open(
+    postWidget(post, lightboxConfig(self.config), null, mediaIndex),
+    getCanNavigateFunc(self, post, mediaIndex),
+    getNavigateFunc(self, post, mediaIndex),
+    self.container.id + '-lightbox',
+    function () {
+      onLightboxClose(self);
+    }
+  );
+  self.hasOpenLightbox = true;
+}
+
+function closeLightbox (self, fromHistory) {
+  console.log('Calling closeLightbox');
+  self.hasOpenLightbox = false;
+  lightbox.close(function () {
+    if (!fromHistory) onLightboxClose(self);
+  });
 }
 
 function getPostMedia (post, opt) {
@@ -192,9 +242,9 @@ function getNavigateFunc (self, post, mediaIndex) {
     if (navigated) {
       var nextPost = navigated[0];
       var nextMediaIndex = navigated[1];
-      lightbox.open(postWidget(nextPost, lightboxConfig(self.config), null, nextMediaIndex), getCanNavigateFunc(self, nextPost, nextMediaIndex), getNavigateFunc(self, nextPost, nextMediaIndex), self.container.id + '-lightbox');
+      openLightbox(self, nextPost, nextMediaIndex);
     } else {
-      lightbox.close();
+      closeLightbox(self);
     }
   };
 }
