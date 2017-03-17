@@ -9,7 +9,7 @@ var generateCSS = require('@tagplay/tagplay-widget-styles').generateCSS;
 
 module.exports = Widget;
 
-if (window && window.tagplayWidgetQueue) {
+if (typeof window !== 'undefined' && window.tagplayWidgetQueue) {
   window.tagplayWidgetQueue.forEach(function (widgetElement) {
     Widget(widgetElement);
   });
