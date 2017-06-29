@@ -309,7 +309,7 @@ function getNavigatedPost (self, post, direction, mediaIndex) {
 }
 
 function lightboxConfig (config) {
-  return getModifiedConfig(config, { inline_video: true, inline_link_embed: true, play_video: true, play_sound: true });
+  return getModifiedConfig(config, { inline_video: true, inline_link_embed: true, play_video: true, play_sound: true, full_link_description: true });
 }
 
 function getModifiedConfig (config, edits) {

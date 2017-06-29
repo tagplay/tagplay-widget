@@ -25,11 +25,11 @@
   },
   "homepage": "https://github.com/tagplay/tagplay-widget",
   "dependencies": {
-    "@tagplay/tagplay-widget-styles": "2.9.1",
+    "@tagplay/tagplay-widget-styles": "2.9.2",
     "data-set": "4.0.0",
     "is-dom": "1.0.5",
     "tagplay-lightbox": "1.1.0",
-    "tagplay-standalone-post": "2.2.1",
+    "tagplay-standalone-post": "2.3.0",
     "tagplay": "1.2.0"
   },
   "devDependencies": {
