@@ -168,6 +168,16 @@ function fetch (self) {
   });
 }
 
+function copyObject (obj) {
+  var newObj = {};
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      newObj[key] = obj[key];
+    }
+  }
+  return newObj;
+}
+
 function loadPosts (self, posts) {
   posts.forEach(each);
 
@@ -176,8 +186,36 @@ function loadPosts (self, posts) {
   }
 
   function each (post) {
-    self.posts.push(post);
-    show(self, post);
+    if (self.config.flatten_posts && (post.videos.length > 0 || post.images.length > 0)) {
+      var posts = [];
+      post.videos.forEach(function (video, i) {
+        posts.push(flattenPost([], [video], '-video-' + i));
+      });
+      post.images.forEach(function (image, i) {
+        posts.push(flattenPost([image], [], '-image-' + i));
+      });
+      posts.sort(function (a, b) {
+        return a.order - b.order;
+      })
+      posts.forEach(addPost);
+    } else {
+      addPost(post);
+    }
+
+    function flattenPost (images, videos, idSuffix) {
+      var flattenedPost = copyObject(post);
+      flattenedPost.images = images;
+      flattenedPost.videos = videos;
+      flattenedPost.id += idSuffix;
+      return flattenedPost;
+    }
+
+    function addPost (post) {
+      if (self.posts.length < self.config.num_media) {
+        self.posts.push(post);
+        show(self, post);
+      }
+    }
   }
 }
 
