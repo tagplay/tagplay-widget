@@ -28,9 +28,9 @@
     "@tagplay/tagplay-widget-styles": "2.9.4",
     "data-set": "4.0.0",
     "is-dom": "1.0.5",
+    "tagplay": "1.2.0",
     "tagplay-lightbox": "1.1.0",
-    "tagplay-standalone-post": "2.6.1",
-    "tagplay": "1.2.0"
+    "tagplay-standalone-post": "2.7.0"
   },
   "devDependencies": {
     "browserify": "^9.0.8",
