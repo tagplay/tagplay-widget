@@ -94,7 +94,7 @@ function addStyles (self) {
   var curContainer = self.container;
   while (curContainer.parentNode) {
     curContainer = curContainer.parentNode;
-    if (curContainer.id) {
+    if (curContainer.id && /^[A-Za-z][A-Za-z0-9_-]*$/.test(curContainer.id)) {
       selectorPrefix = '#' + curContainer.id + ' ' + selectorPrefix;
       break;
     }
