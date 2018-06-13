@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/tagplay/tagplay-widget",
   "dependencies": {
-    "@tagplay/tagplay-widget-styles": "2.9.4",
+    "@tagplay/tagplay-widget-styles": "2.9.5",
     "data-set": "4.0.0",
     "is-dom": "1.0.5",
     "tagplay": "1.2.0",
