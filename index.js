@@ -225,13 +225,35 @@ function addBranding (self) {
   // self.container.appendChild(elem);
 }
 
+function isLinkClick (event) {
+  var target = event.target;
+  while (target) {
+    if (target.nodeName === 'A') {
+      return true;
+    }
+    target = target.parentNode;
+  }
+  return false;
+}
+
+function openOriginal (post) {
+  if (!post.provider.origin) return;
+  window.open(post.provider.origin, '_blank');
+}
+
 function show (self, post) {
   var config = self.config;
   config.client = self.client;
   var onclick;
   if (config.lightbox) {
-    onclick = function () {
+    onclick = function (event) {
+      if (isLinkClick(event)) return;
       openLightbox(self, post, 0);
+    };
+  } else if (config.link_posts) {
+    onclick = function (event) {
+      if (isLinkClick(event)) return;
+      openOriginal(post);
     };
   }
   var elem = postWidget(post, config, onclick);
@@ -254,7 +276,10 @@ function openLightbox (self, post, mediaIndex, fromHistory) {
     }
   }
   lightbox.open(
-    postWidget(post, lightboxConfig(self.config), null, mediaIndex),
+    postWidget(post, lightboxConfig(self.config), self.config.link_posts ? function (event) {
+      if (isLinkClick(event)) return;
+      openOriginal(post);
+    } : null, mediaIndex),
     getCanNavigateFunc(self, post, mediaIndex),
     getNavigateFunc(self, post, mediaIndex),
     self.container.id + '-lightbox',
@@ -266,7 +291,6 @@ function openLightbox (self, post, mediaIndex, fromHistory) {
 }
 
 function closeLightbox (self, fromHistory) {
-  console.log('Calling closeLightbox');
   self.hasOpenLightbox = false;
   lightbox.close(function () {
     if (!fromHistory) onLightboxClose(self);
